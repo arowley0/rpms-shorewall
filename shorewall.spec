@@ -5,8 +5,10 @@
 # which is found at http://www.shorewall.net/Anatomy.html
 
 Name:           shorewall
+# Note that we need to maintain the evr < 4.4.21.4 so as not to break switch
+# over to systemd in F16/EL7
 Version:        %{mainver}.1
-Release:        3%{?dist}
+Release:        3%{?dist}.1
 Summary:        An iptables front end for firewall configuration
 Group:          Applications/System
 License:        GPLv2+
@@ -147,6 +149,9 @@ for i in $targets; do
     ./install.sh
     popd
 done
+
+# Make files under libexec executable
+chmod 755 $RPM_BUILD_ROOT%{_libexecdir}/shorewall/*
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -312,6 +317,9 @@ fi
 %{_libexecdir}/shorewall-init
 
 %changelog
+* Sat Jul 23 2011 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.4.21.1-3.1
+- Make files in libexec directory executable
+
 * Thu Jul 21 2011 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.4.21-3
 - Properly use PERLLIB environment variable for installation of the perl libraries
 
