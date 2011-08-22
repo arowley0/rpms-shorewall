@@ -6,7 +6,7 @@
 
 Name:           shorewall
 Version:        %{mainver}.3
-Release:        2%{?dist}
+Release:        2%{?dist}.1
 Summary:        An iptables front end for firewall configuration
 Group:          Applications/System
 License:        GPLv2+
@@ -234,10 +234,10 @@ fi
 %{_mandir}/man5/shorewall*
 %exclude %{_mandir}/man5/shorewall6*
 %exclude %{_mandir}/man5/shorewall-lite*
-%exclude %{_mandir}/man5/shorewall-init*
 %{_mandir}/man8/shorewall*
 %exclude %{_mandir}/man8/shorewall6*
 %exclude %{_mandir}/man8/shorewall-lite*
+%exclude %{_mandir}/man8/shorewall-init*
 %dir %{_localstatedir}/lib/shorewall
 
 %files lite
@@ -297,6 +297,9 @@ fi
 %{_libexecdir}/shorewall-init
 
 %changelog
+* Mon Aug 22 2011 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.4.22.3-2.1
+- Fix up error in files list
+
 * Mon Aug 22 2011 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.4.22.3-2
 - Change file list defattr to (-,root,root,-)
 - Fix up file lists and permissions
