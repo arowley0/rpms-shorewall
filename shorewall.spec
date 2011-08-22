@@ -1,23 +1,23 @@
 %global mainver 4.4.22
-%global _baseurl http://www.shorewall.net/pub/shorewall/4.4/shorewall-%{mainver}/
+%global baseurl http://www.shorewall.net/pub/shorewall/4.4/shorewall-%{mainver}/
 
 # A very helpful document for packaging Shorewall is "Anatomy of Shorewall 4.0"
 # which is found at http://www.shorewall.net/Anatomy.html
 
 Name:           shorewall
 Version:        %{mainver}.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        An iptables front end for firewall configuration
 Group:          Applications/System
 License:        GPLv2+
 URL:            http://www.shorewall.net/
 Provides:	shorewall(firewall) = %{version}-%{release}
 
-Source0:        %{_baseurl}/%{name}-%{version}.tar.bz2
-Source1:        %{_baseurl}/%{name}-lite-%{version}.tar.bz2
-Source2:        %{_baseurl}/%{name}6-%{version}.tar.bz2
-Source3:        %{_baseurl}/%{name}6-lite-%{version}.tar.bz2
-Source4:        %{_baseurl}/%{name}-init-%{version}.tar.bz2
+Source0:        %{baseurl}/%{name}-%{version}.tar.bz2
+Source1:        %{baseurl}/%{name}-lite-%{version}.tar.bz2
+Source2:        %{baseurl}/%{name}6-%{version}.tar.bz2
+Source3:        %{baseurl}/%{name}6-lite-%{version}.tar.bz2
+Source4:        %{baseurl}/%{name}-init-%{version}.tar.bz2
 
 # Init file for all sub-packages except shorewall-init
 Source10:       shorewall-foo-init.sh
@@ -46,6 +46,7 @@ standalone GNU/Linux system.
 %package -n shorewall6
 Summary:        Files for the IPV6 Shorewall Firewall
 Group:          Applications/System
+Provides:	shorewall(firewall) = %{version}-%{release}
 Requires:       shorewall = %{version}-%{release}
 Requires:       iptables-ipv6 iproute
 Requires(post): /sbin/chkconfig
@@ -57,8 +58,8 @@ This package contains the files required for IPV6 functionality of the
 Shoreline Firewall (shorewall).
 
 %package lite
-Group:          Applications/System
 Summary:        Shorewall firewall for compiled rulesets
+Group:          Applications/System
 Provides:	shorewall(firewall) = %{version}-%{release}
 Requires:       iptables iproute
 Requires(post): /sbin/chkconfig
@@ -73,8 +74,8 @@ machine with a Shorewall rule compiler. A machine running Shorewall
 Lite does not need to have a Shorewall rule compiler installed.
 
 %package -n shorewall6-lite
-Group:          Applications/System
 Summary:        Shorewall firewall for compiled IPV6 rulesets
+Group:          Applications/System
 Provides:	shorewall(firewall) = %{version}-%{release}
 Requires:       iptables iproute
 Requires(post): /sbin/chkconfig
@@ -90,8 +91,8 @@ compiler. A machine running Shorewall Lite does not need to have a
 Shorewall rule compiler installed.
 
 %package init
-Group:          Applications/System
 Summary:    	Initialization functionality and NetworkManager integration for Shorewall
+Group:          Applications/System
 Requires:	shorewall(firewall) = %{version}-%{release}
 Requires:       NetworkManager
 Requires(post): /sbin/chkconfig
@@ -148,6 +149,14 @@ for i in $targets; do
     popd
 done
 
+# Fix up file permissions
+chmod 644 $RPM_BUILD_ROOT%{_datadir}/shorewall-lite/{helpers,modules}
+chmod 644 $RPM_BUILD_ROOT%{_datadir}/shorewall6-lite/{helpers,modules}
+chmod 755 $RPM_BUILD_ROOT/sbin/shorewall-lite
+chmod 755 $RPM_BUILD_ROOT/sbin/shorewall6-lite
+chmod 644 $RPM_BUILD_ROOT%{_sysconfdir}/shorewall-lite/shorewall-lite.conf
+chmod 644 $RPM_BUILD_ROOT%{_sysconfdir}/shorewall6-lite/shorewall6-lite.conf
+chmod 755 $RPM_BUILD_ROOT%{_sysconfdir}/NetworkManager/dispatcher.d/01-shorewall
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -212,107 +221,88 @@ if [ $1 = 0 ]; then
 fi
 
 %files
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc shorewall-%{version}/{COPYING,changelog.txt,releasenotes.txt,Samples}
-
-%attr(0755,root,root) %{_initrddir}/shorewall
-%attr(0755,root,root) /sbin/shorewall
-
+%{_initrddir}/shorewall
+/sbin/shorewall
 %dir %{_sysconfdir}/shorewall
 %config(noreplace) %{_sysconfdir}/shorewall/*
 %config(noreplace) %{_sysconfdir}/logrotate.d/shorewall
-
-%attr(0755,root,root) %{_libexecdir}/shorewall
+%{_libexecdir}/shorewall
 %{_datadir}/shorewall
 %{perl_privlib}/Shorewall
-
 %{_mandir}/man5/shorewall*
 %exclude %{_mandir}/man5/shorewall6*
 %exclude %{_mandir}/man5/shorewall-lite*
-
+%exclude %{_mandir}/man5/shorewall-init*
 %{_mandir}/man8/shorewall*
 %exclude %{_mandir}/man8/shorewall6*
 %exclude %{_mandir}/man8/shorewall-lite*
-
 %dir %{_localstatedir}/lib/shorewall
 
 %files lite
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc shorewall-lite-%{version}/{COPYING,changelog.txt,releasenotes.txt}
-
-%attr(0755,root,root) %{_initrddir}/shorewall-lite
-%attr(0755,root,root) /sbin/shorewall-lite
-
+%{_initrddir}/shorewall-lite
+/sbin/shorewall-lite
 %dir %{_sysconfdir}/shorewall-lite
 %config(noreplace) %{_sysconfdir}/shorewall-lite/shorewall-lite.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/shorewall-lite
 %{_sysconfdir}/shorewall-lite/Makefile
-
 %{_datadir}/shorewall-lite
-%attr(0755,root,root) %{_libexecdir}/shorewall-lite
-
+%{_libexecdir}/shorewall-lite
 %{_mandir}/man5/shorewall-lite*
 %{_mandir}/man8/shorewall-lite*
-
 %dir %{_localstatedir}/lib/shorewall-lite
 
 %files -n shorewall6
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc shorewall6-%{version}/{COPYING,changelog.txt,releasenotes.txt,Samples6}
-
-%attr(0755,root,root) %{_initrddir}/shorewall6
-%attr(0755,root,root) /sbin/shorewall6
-
+%{_initrddir}/shorewall6
+/sbin/shorewall6
 %dir %{_sysconfdir}/shorewall6
 %config(noreplace) %{_sysconfdir}/shorewall6/*
 %config(noreplace) %{_sysconfdir}/logrotate.d/shorewall6
-
 %{_mandir}/man5/shorewall6*
 %exclude %{_mandir}/man5/shorewall6-lite*
-
 %{_mandir}/man8/shorewall6*
 %exclude %{_mandir}/man8/shorewall6-lite*
-
-%attr(0755,root,root) %{_libexecdir}/shorewall6
+%{_libexecdir}/shorewall6
 %{_datadir}/shorewall6
-
 %dir %{_localstatedir}/lib/shorewall6
 
 %files -n shorewall6-lite
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc shorewall6-lite-%{version}/{COPYING,changelog.txt,releasenotes.txt}
-
-%attr(0755,root,root) %{_initrddir}/shorewall6-lite
-%attr(0755,root,root) /sbin/shorewall6-lite
-
+%{_initrddir}/shorewall6-lite
+/sbin/shorewall6-lite
 %dir %{_sysconfdir}/shorewall6-lite
 %config(noreplace) %{_sysconfdir}/shorewall6-lite/shorewall6-lite.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/shorewall6-lite
 %{_sysconfdir}/shorewall6-lite/Makefile
-
 %{_mandir}/man5/shorewall6-lite*
 %{_mandir}/man8/shorewall6-lite*
-
 %{_datadir}/shorewall6-lite
-%attr(0755,root,root) %{_libexecdir}/shorewall6-lite
-
+%{_libexecdir}/shorewall6-lite
 %dir %{_localstatedir}/lib/shorewall6-lite
 
 %files init
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc shorewall-init-%{version}/{COPYING,changelog.txt,releasenotes.txt}
-
-%attr(0755,root,root) %{_initrddir}/shorewall-init
-
-%attr(0755,root,root) %{_sysconfdir}/NetworkManager/dispatcher.d/01-shorewall
+%{_initrddir}/shorewall-init
+%{_sysconfdir}/NetworkManager/dispatcher.d/01-shorewall
 %config(noreplace) %{_sysconfdir}/sysconfig/shorewall-init
-
 %{_mandir}/man8/shorewall-init.8.*
-
 %{_datadir}/shorewall-init
-%attr(0755,root,root) %{_libexecdir}/shorewall-init
+%{_libexecdir}/shorewall-init
 
 %changelog
+* Mon Aug 22 2011 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.4.22.3-2
+- Change file list defattr to (-,root,root,-)
+- Fix up file lists and permissions
+- Fix up a missing virtual Provides
+- Rename _baseurl macro to baseurl
+
 * Sat Aug 20 2011 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.4.22.3-1
 - Update to 4.4.22.3
 - Remove patches already upstream
