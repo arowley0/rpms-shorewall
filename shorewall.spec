@@ -1,4 +1,4 @@
-%global mainver 4.4.22
+%global mainver 4.4.23
 %global baseurl http://www.shorewall.net/pub/shorewall/4.4/shorewall-%{mainver}/
 
 # A very helpful document for packaging Shorewall is "Anatomy of Shorewall 4.0"
@@ -6,7 +6,7 @@
 
 Name:           shorewall
 Version:        %{mainver}.3
-Release:        2%{?dist}.1
+Release:        1%{?dist}
 Summary:        An iptables front end for firewall configuration
 Group:          Applications/System
 License:        GPLv2+
@@ -19,11 +19,10 @@ Source2:        %{baseurl}/%{name}6-%{version}.tar.bz2
 Source3:        %{baseurl}/%{name}6-lite-%{version}.tar.bz2
 Source4:        %{baseurl}/%{name}-init-%{version}.tar.bz2
 
-# Init file for all sub-packages except shorewall-init
-Source10:       shorewall-foo-init.sh
-
-# Init file for shorewall-init
-Source11:   	shorewall-init.sh
+Patch0:		shorewall-init.patch
+Patch1:		shorewall-lite-init.patch
+Patch2:		shorewall6-init.patch
+Patch3:		shorewall6-lite-init.patch
 
 BuildRequires:  perl
 BuildArch:      noarch
@@ -110,22 +109,10 @@ for 'event-driven' startup and shutdown.
 %prep
 %setup -q -c -n %{name}-%{version} -T -a0 -a1 -a2 -a3 -a4
 
-# Overwrite default init files with Fedora specific ones
-cp %{SOURCE10} shorewall-%{version}/init.sh
-
-cp %{SOURCE10} shorewall-lite-%{version}/init.sh
-sed -i -e 's|prog="shorewall"|prog="shorewall-lite"|' shorewall-lite-%{version}/init.sh
-sed -i -e 's|Provides: shorewall|Provides: shorewall-lite|' shorewall-lite-%{version}/init.sh
-
-cp %{SOURCE10} shorewall6-%{version}/init.sh
-sed -i -e 's|prog="shorewall"|prog="shorewall6"|' shorewall6-%{version}/init.sh
-sed -i -e 's|Provides: shorewall|Provides: shorewall6|' shorewall6-%{version}/init.sh
-
-cp %{SOURCE10} shorewall6-lite-%{version}/init.sh
-sed -i -e 's|prog="shorewall"|prog="shorewall6-lite"|' shorewall6-lite-%{version}/init.sh
-sed -i -e 's|Provides: shorewall|Provides: shorewall6-lite|' shorewall6-lite-%{version}/init.sh
-
-cp %{SOURCE11} shorewall-init-%{version}/init.sh
+%patch0 -p0
+%patch1 -p0
+%patch2 -p0
+%patch3 -p0
 
 # Remove hash-bang from files which are not directly executed as shell
 # scripts. This silences some rpmlint errors.
@@ -139,12 +126,11 @@ export DEST=%{_initrddir}
 export LIBEXEC=%{_libexecdir}
 export PERLLIB=%{perl_privlib}
 
-targets="shorewall-%{version} shorewall-lite-%{version} \
-shorewall6-%{version} shorewall6-lite-%{version} \
-shorewall-init-%{version}"
+targets="shorewall shorewall-lite shorewall6 shorewall6-lite shorewall-init"
 
 for i in $targets; do
-    pushd $i
+    pushd $i-%{version}
+    mv init.fedora.sh init.sh
     ./install.sh
     popd
 done
@@ -297,6 +283,11 @@ fi
 %{_libexecdir}/shorewall-init
 
 %changelog
+* Mon Aug 22 2011 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.4.23.3-1
+- Update to 4.4.23.3
+- Use upstreamed SysV init files
+- Add cosmetic patches for init files
+
 * Mon Aug 22 2011 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.4.22.3-2.1
 - Fix up error in files list
 
