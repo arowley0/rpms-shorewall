@@ -1,0 +1,30 @@
+diff -up shorewall-4.4.23.3/init.fedora.sh.orig shorewall-4.4.23.3/init.fedora.sh
+--- shorewall-4.4.23.3/init.fedora.sh.orig	2011-09-28 20:39:16.276884494 +0100
++++ shorewall-4.4.23.3/init.fedora.sh	2011-09-28 20:42:38.247551968 +0100
+@@ -33,7 +33,7 @@ if [ -f /etc/sysconfig/$prog ]; then
+ fi
+ 
+ start() {
+-    echo -n $"Starting Shorewall: "
++    echo -n $"Starting $prog: "
+     $shorewall $OPTIONS start 2>&1 | $logger
+     retval=${PIPESTATUS[0]}
+     if [[ $retval == 0 ]]; then 
+@@ -47,7 +47,7 @@ start() {
+ }
+ 
+ stop() {
+-    echo -n $"Stopping Shorewall: "
++    echo -n $"Stopping $prog: "
+     $shorewall $OPTIONS stop 2>&1 | $logger
+     retval=${PIPESTATUS[0]}
+     if [[ $retval == 0 ]]; then 
+@@ -63,7 +63,7 @@ stop() {
+ restart() {
+ # Note that we don't simply stop and start since shorewall has a built in
+ # restart which stops the firewall if running and then starts it.
+-    echo -n $"Restarting Shorewall: "
++    echo -n $"Restarting $prog: "
+     $shorewall $OPTIONS restart 2>&1 | $logger
+     retval=${PIPESTATUS[0]}
+     if [[ $retval == 0 ]]; then 
