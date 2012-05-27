@@ -284,12 +284,12 @@ fi
 %{_datadir}/shorewall/lib.base
 %{_datadir}/shorewall/lib.cli
 %{_datadir}/shorewall/lib.common
+%{_datadir}/shorewall/shorewallrc
 %dir %{_libexecdir}/shorewall
 %{_libexecdir}/shorewall/wait4ifup
 
 %files init
 %doc shorewall-init-%{version}/{COPYING,changelog.txt,releasenotes.txt}
-/sbin/shorewall-init
 %{_sysconfdir}/NetworkManager/dispatcher.d/01-shorewall
 %config(noreplace) %{_sysconfdir}/sysconfig/shorewall-init
 %{_mandir}/man8/shorewall-init.8.*
