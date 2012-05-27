@@ -1,4 +1,4 @@
-%global mainver 4.5.1
+%global mainver 4.5.4
 #global baseurl http://www.shorewall.net/pub/shorewall/development/4.5/shorewall-4.5.0/
 %global baseurl http://www.shorewall.net/pub/shorewall/4.5/shorewall-%{mainver}/
 
@@ -22,6 +22,8 @@ Source4:        %{baseurl}/%{name}-init-%{version}.tar.bz2
 Source5:        %{baseurl}/%{name}-core-%{version}.tar.bz2
 
 BuildRequires:  perl
+BuildRequires:  perl(Digest::SHA)
+
 BuildArch:      noarch
 
 Requires:         shorewall-core = %{version}-%{release}
@@ -115,18 +117,13 @@ find . -name "lib.*" -exec sed -i -e '/\#\!\/bin\/sh/d' {} \;
 %build
 
 %install
-export PREFIX=$RPM_BUILD_ROOT
-export DEST=%{_initrddir}
-export LIBEXEC=%{_libexecdir}
-export PERLLIB=%{perl_privlib}
-
 targets="shorewall shorewall-core shorewall-lite shorewall6 shorewall6-lite shorewall-init"
-
-install -d $RPM_BUILD_ROOT%{_unitdir}
 
 for i in $targets; do
     pushd ${i}-%{version}
-    ./install.sh
+    sed -i -e '/SYSTEMD/d' shorewallrc.redhat
+    ./configure vendor=redhat
+    DESTDIR=$RPM_BUILD_ROOT ./install.sh
     popd
 done
 
@@ -207,6 +204,7 @@ fi
 %doc shorewall-%{version}/{COPYING,changelog.txt,releasenotes.txt,Samples}
 /sbin/shorewall
 %dir %{_sysconfdir}/shorewall
+%config(noreplace) %{_sysconfdir}/sysconfig/shorewall
 %config(noreplace) %{_sysconfdir}/shorewall/*
 %config(noreplace) %{_sysconfdir}/logrotate.d/shorewall
 %{_datadir}/shorewall/action.*
@@ -222,7 +220,7 @@ fi
 %{_datadir}/shorewall/version
 %{_libexecdir}/shorewall/compiler.pl
 %{_libexecdir}/shorewall/getparams
-%{perl_privlib}/Shorewall
+%{perl_vendorlib}/Shorewall
 %{_mandir}/man5/shorewall*
 %exclude %{_mandir}/man5/shorewall6*
 %exclude %{_mandir}/man5/shorewall-lite*
@@ -237,6 +235,7 @@ fi
 %doc shorewall-lite-%{version}/{COPYING,changelog.txt,releasenotes.txt}
 /sbin/shorewall-lite
 %dir %{_sysconfdir}/shorewall-lite
+%config(noreplace) %{_sysconfdir}/sysconfig/shorewall-lite
 %config(noreplace) %{_sysconfdir}/shorewall-lite/shorewall-lite.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/shorewall-lite
 %{_sysconfdir}/shorewall-lite/Makefile
@@ -250,6 +249,7 @@ fi
 %files -n shorewall6
 %doc shorewall6-%{version}/{COPYING,changelog.txt,releasenotes.txt,Samples6}
 /sbin/shorewall6
+%config(noreplace) %{_sysconfdir}/sysconfig/shorewall6
 %dir %{_sysconfdir}/shorewall6
 %config(noreplace) %{_sysconfdir}/shorewall6/*
 %config(noreplace) %{_sysconfdir}/logrotate.d/shorewall6
@@ -264,6 +264,7 @@ fi
 %files -n shorewall6-lite
 %doc shorewall6-lite-%{version}/{COPYING,changelog.txt,releasenotes.txt}
 /sbin/shorewall6-lite
+%config(noreplace) %{_sysconfdir}/sysconfig/shorewall6-lite
 %dir %{_sysconfdir}/shorewall6-lite
 %config(noreplace) %{_sysconfdir}/shorewall6-lite/shorewall6-lite.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/shorewall6-lite
@@ -288,6 +289,7 @@ fi
 
 %files init
 %doc shorewall-init-%{version}/{COPYING,changelog.txt,releasenotes.txt}
+/sbin/shorewall-init
 %{_sysconfdir}/NetworkManager/dispatcher.d/01-shorewall
 %config(noreplace) %{_sysconfdir}/sysconfig/shorewall-init
 %{_mandir}/man8/shorewall-init.8.*
@@ -297,6 +299,9 @@ fi
 
 
 %changelog
+* Sun Mar 18 2012 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.5.4-1
+- Update to 4.5.4
+
 * Sun Mar 18 2012 Jonathan G. Underwood <jonathan.underwood@gmail.com> - 4.5.1-1
 - Update to 4.5.1
 
